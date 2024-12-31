@@ -20,7 +20,10 @@ private:
     
 public:
     DataStructure(); /*array con gli id lo riempio piano piano*/
+    
     void set (bool status) override;
+    void set (int start_device, int stop_device) override;
+    void rm (string name) override;
     
     array<bool, 10> get_Device_On(int moment);               //mi dice in un certo momento chi e acceso (true = accesp, false = spento)
     bool get_one_device_on(int id, int moment);              //mi dice in un certo momento se un dispositiov particolare e acceso o spento
