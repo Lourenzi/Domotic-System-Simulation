@@ -7,47 +7,63 @@
 
 #include <iostream>
 #include <string>
-#include <array>
+#include <vector>
 #include "DataStructure.h"
+
+#include <stdexcept>
 
 using namespace std;
 
-DataStructure::DataStructure() {}; /*variabili private gia settate di deafault*/
+DataStructure::DataStructure(){}; /*vector degli elementi e gia vuoto*/
 
-void DataStructure::set(bool status)
+void DataStructure::sort(EntryStructure entry) /*riordinare il vettore in base al tempo che caratterizza ogni elemento*/
 {
-    if (ID == -1) /*gli devo dare uh ID valido*/
+    int timeEntry = entry.get_keyTime();
+    int counter = 0;
+    for (int i =0; i<eventi.size(); i++)
     {
-        for (int i =0; i<name_id.size(); i++) if (name_id[i] == "") { name_id[i] = name; ID = i; }
-        /*inserisco nellárray id_nome il nome del device e mi salvo in ID la posizione*/
+        if (eventi[i].get_keyTime()>timeEntry)
+        {
+            counter = i;
+            break;
+        }
     }
-    for (int i = tempo; i< data.size(); i++) data[ID][i] = status; /*spento -> status = false, acceso -> status = true*/
-    if (status)
+    eventi.insert(eventi.begin() + counter, entry);
+}
+
+void DataStructure::set(bool status, int time)
+{
+    if (status) /*caso in cui lo debba accendere*/
     {
-        start = tempo; /*inizzializzzione variabili del DEVICE*/
-        end = (int)data.size()-1; /*inizzializzzione variabili del DEVICE*/
+        if (on) throw invalid_argument("oggetto gia acceso");
+        else
+        {
+            EntryStructure entryInizio (time, name, status);
+            EntryStructure entryFine (60*24, name, !status);
+            sort (entryInizio);
+            eventi.insert(eventi.begin() + eventi.size(), entryFine);
+        }
     }
-    else end = tempo;
+    else /*caso in cui lo debba spegnere*/
+    {
+        if (!on) throw invalid_argument("oggetto gia spento");
+        else /*devo spegnerlo prima del previsto*/
+        {
+            for (int i =time; i<eventi.size(); i++) /*cerco quando avrei dovuto spegnerlo*/
+            {
+                if (eventi[i].get_element() == name && eventi[i].get_status() == true) /*trovo il momento*/
+                {
+                    for (int f = i; f<eventi.size()-1; f++) eventi[f] = eventi[f+1]; /*slitto di uno a sinistra per eliminarlo*/
+                    eventi.pop_back(); /*tolgo lútima che si sara duplicato*/
+                }
+            }
+            EntryStructure entry (time, name, status); /*creo lo spegnimento corretto*/
+            sort (entry);
+        }
+    }
+}
+
+void DataStructure::set (int start_device, int stop_device)
+{
     
-}
-
-void DataStructure::set(int start_device, int stop_device)
-{
-    if (ID == -1) /*gli devo dare uh ID valido*/
-    {
-        for (int i =0; i<name_id.size(); i++) if (name_id[i] == "") { name_id[i] = name; ID = i; }
-        /*inserisco nellárray id_nome il nome del device e mi salvo in ID la posizione*/
-    }
-    for (int i = start_device; i<= stop_device; i++) data[ID][i] = true;
-    start = start_device; /*inizzializzzione variabili del DEVICE*/
-    end = stop_device; /*inizzializzzione variabili del DEVICE*/
-}
-
-void DataStructure::rm(string name)
-{
-    if (!automatic)
-    {
-        for (int i = end; i<data.size(); i++) data[ID][i] = true; /*togliendo il timer */
-        end = (int)data.size()-1;
-    }
 }
