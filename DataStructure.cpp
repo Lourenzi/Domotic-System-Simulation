@@ -39,7 +39,7 @@ void DataStructure::set(bool status, int time)  /*viene settato un dispositivo o
         else    /*seno*/
         {
             EntryStructure entryInizio (time, name, true/*accendo*/);    /*creo lévento accensione dispositivo*/
-            EntryStructure entryFine (60*24, name, false/*spengo*/);    /*creo lévento spegnimento dispositivo*/
+            EntryStructure entryFine ((60*24)+1, name, false/*spengo*/);    /*creo lévento spegnimento dispositivo*/
             sort (entryInizio); /*metto nellórdine corretto la entry iniziale*/
             eventi.insert(eventi.begin() + eventi.size(), entryFine);   /*so che spengo il dispositivo a mezzanotte*/
         }
@@ -72,37 +72,43 @@ void DataStructure::set (int start_device, int stop_device) /*setto accensione e
     EntryStructure entryInizio (start_device, name, true); /*creo la entry che mi rapprsenta láccensione*/
     EntryStructure entryFine (stop_device, name, false); /*creo la entry che mi rappresenta lo spegnimento*/
     /*prima di inserire i due eventi allínterno dello storico verifico che abbia senso inserirli*/
-
-    int time1 = 0; int time2 = 0;
-    bool buono = false;
+    
+    int time1 = 0; int time2 = 0;   /*salvo il momento (potevo salvarmi anche solamente la posizione ma chill)*/
+    int position_time1 = 0; int position_time2 = 0; /*cosi so da dove ho preso le informazioni*/
+    bool acceso = false; /*posso cadere nel secondo if solo doppo il primo*/
     for (int i =0; i<eventi.size(); i++)
     {
-        if (eventi[i].get_element() == name && eventi[i].get_status() == true) time1 = eventi[i].get_keyTime();
-        if (eventi[i].get_element() == name && eventi[i].get_status() == false) time2 = eventi[i].get_keyTime();
-        if (/*3 casi*/
-            /*1)*/ (time1<=start_device && time2>=start_device && time2<=stop_device) ||
-            /*2)*/ (time1<=start_device && time2>=stop_device) ||
-            /*3)*/ (time1>=start_device && time1<=stop_device && time2>=stop_device))
-            buono = true;
+        if (eventi[i].get_element() == name && eventi[i].get_status() == true)
+            {time1 = eventi[i].get_keyTime(); position_time1 = i; acceso = true;}
+        if (eventi[i].get_element() == name && eventi[i].get_status() == false && acceso)
+            {time2 = eventi[i].get_keyTime(); position_time2 = i;}
     }
-    
-    
-    
+    if (/*3 casi*/
+        /*1)*/ (time1<=start_device && time2>=start_device && time2<=stop_device) ||
+        /*2)*/ (time1<=start_device && time2>=stop_device) ||
+        /*3)*/ (time1>=start_device && time1<=stop_device && time2>=stop_device))
+    { /*in questo caso vanno eliminate queste azioni e sostituite con le nuove*/
+        for (int i = position_time2; i<eventi.size(); i++) {eventi[i] = eventi[i+1]; eventi.pop_back();}
+        for (int i = position_time1; i<eventi.size(); i++) {eventi[i] = eventi[i+1]; eventi.pop_back();}
+    }
+    /*se non sono in uno dei tre casi sopra vuol dire che il dispositivo non fa nulla in questo frangente di tempo*/
     sort(entryInizio); /*butto dentro e riordino*/
     sort(entryFine);
 }
 
-void DataStructure::rm (string nameRemove)
+void DataStructure::rm (string nameRemove, int now) /*devo mettere now seno potrei togliere uno spegnimento passato e non ha senso*/
 {
-    for (int i =0; i< eventi.size(); i++)
+    for (int i = now; i< eventi.size(); i++)    /*cerco in cio che accadra da now in poi*/
     {
-        if (eventi[i].get_element() == name && eventi[i].get_status() == false)
+        if (eventi[i].get_element() == name && eventi[i].get_status() == false && eventi[i].get_keyTime()!=(60*24)+1)
+            /*se il time della entry a quel valore vuol dire che non si spegne in questa giornata*/
         {
             for (int j = i; j<eventi.size(); j++) eventi[j] = eventi[j+1];
             eventi.pop_back();
         }
     }
-    EntryStructure entryFine (60*24, name, false);
+    EntryStructure entryFine ((60*24)+1, name, false);
+    /*metto (60*24)+1 perche non e un orario ma e lidea che resta acceso finche non lo spengo io*/
     sort(entryFine);
 }
 
