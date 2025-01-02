@@ -7,19 +7,24 @@
 #include <iostream>
 #include <string>
 #include <vector>
+
 #include "Device.h"
 #include "EntryStructure.h"
+#include "time.h"
 
 using namespace std;
-class DataStructure : public Device
+class DataStructure
 {
 private:
     vector<EntryStructure> eventi;
 public:
     DataStructure(); /*viene creato allínizio quando non ci sono eventi ancora eseguiti*/
-    void set (bool status, int time) override;
-    void set (int start_device, int stop_device) override;
-    void rm (string name) override;
+    
+    void set (Device device, bool status, int time);
+    void set (Device device, int start_device, int stop_device);
+    void rm (Device device, string name,int now);
+    
+    void stampa ();
     
     void sort(EntryStructure entry);
 };
