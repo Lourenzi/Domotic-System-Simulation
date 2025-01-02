@@ -4,6 +4,10 @@
 //
 //  Created by Eduardo on 31/12/24.
 //
+
+#ifndef ENTRYSTRUCTURE_H
+#define ENTRYSTRUCTURE_H
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -22,3 +26,5 @@ public:
     string get_element() {return element;};
     bool get_status() {return on;};
 };
+#endif
+
