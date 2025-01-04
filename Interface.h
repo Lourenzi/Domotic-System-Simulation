@@ -1,7 +1,15 @@
+//Created by Lorenzo
+
+
+#ifndef INTERFACE_H
+#define INTERFACE_H
+
+
 #include <iostream>
 #include <stdexcept>
 #include <string>
 #include <algorithm>
+#include <cctype>
 #include "DataStructure.h"
 using namespace std;
 
@@ -13,8 +21,11 @@ int calculateTime(string time_format){
 	return time_min;
 }
 
-void setTime(int time_since_start){ 
-	cout<<"time : "<<time_since_start<<endl;
+void setTime(string time_format){ 
+	tempo.set_time(calculateTime(time_format));
+	cout<<"Time since 00:00 (mins): "<<tempo.get_currentTime()<<endl;
+	cout<<time_format<<endl;
+
 }
 
 void setStatus(string device_name, string status){ 
@@ -49,16 +60,31 @@ void resetAll(){
 	cout<<"Reset all"<<endl;
 }
 
-bool isTimeFormatValid(string time_format){
-	int hours_i = stoi(time_format.substr(0,2));
-	int mins_i = stoi(time_format.substr(3,2));
-	if((hours_i < 0 || hours_i > 24) && (mins_i < 0 || mins_i > 59))
-		return false;
-	else
-		return true;
+bool isStatusValid(string status){
+	bool statusValid = false;
+	if(status == "on" || status == "off")
+		statusValid = true;
+	return statusValid;
 }
 
-void parseCommand(string cmd){ //funzione di estrapolazione dei parametri del comando da terminale
+bool isTimeFormatValid(string time_format){
+	bool timeValid = false;
+	bool hh_mmValid = false;
+	if(std::count_if(time_format.begin(), time_format.end(), [](char c) { return std::isdigit(static_cast<unsigned char>(c)); }) == 4){
+		hh_mmValid = true;
+	}
+
+	if(time_format.size() == 5 && time_format.find(":") == 2 && hh_mmValid){  //il formato dell'orario deve essere del tipo hh:mm
+		int hours_i = stoi(time_format.substr(0,2));
+		int mins_i = stoi(time_format.substr(3,2));
+		if(hours_i < 24 && mins_i < 60){
+			timeValid = true;
+		}
+	}
+	return timeValid;
+}
+
+void parseCommand(string cmd, ofstream& log){ //funzione di estrapolazione dei parametri del comando da terminale
 	vector<string> parameters; //vector indicizzato cosi' : [tipo di comando] --> 0 , [nome device/time var] --> 1 , [status/ora start timer/ora set] --> 2 , [ora stop timer] --> 3
 	int i_start = 0; // indice di inizio parola i-esima della stringa comando
 	int i = 0;
@@ -73,15 +99,16 @@ void parseCommand(string cmd){ //funzione di estrapolazione dei parametri del co
 
 	string cmd_type = parameters.at(0);  //tipologia del comando immesso
 	vector<string> cmd_types = {"set", "show", "rm", "reset"};
-	int time;  //tempo trascorso in minuti dalle 00:00
 	if(std::find(cmd_types.begin(), cmd_types.end(), cmd_type) != cmd_types.end()){
 		if(cmd_type == "set"){
 			if(parameters.at(1) == "time"){  //se è un comando set time
-				if(isTimeFormatValid(parameters.at(2))){
-					time = calculateTime(parameters.at(2));
-					setTime(time);	
+				if(parameters.size() == 3){
+					if(isTimeFormatValid(parameters.at(2))){
+						setTime(parameters.at(2));	
+					}
+					else{ cout<<"--Formato dell'orario errato--"<<endl; }
 				}
-				else{ cout<<"--Formato dell'orario errato--"<<endl; }
+				else{ cout<<"--Eccessivi o insufficienti parametri immessi--"<<endl; }
 			}
 			else{   //se è un comando set ${DEVICENAME}, trattato nelle sue due versioni
 				if(parameters.size() <= 4 && parameters.size() > 2){
@@ -92,7 +119,10 @@ void parseCommand(string cmd){ //funzione di estrapolazione dei parametri del co
 						else{ cout<<"--Formato dell'orario errato--"<<endl; } 
 					}
 					else{
-						setStatus(parameters.at(1), parameters.at(2));
+						if(isStatusValid(parameters.at(2))) {
+							setStatus(parameters.at(1), parameters.at(2));
+						}
+						else{ cout<<"--Status non settabile--"<<endl; }
 					}
 				}
 				else{ cout<<"--Eccessivi o insufficienti parametri immessi--"<<endl; }
@@ -132,3 +162,5 @@ void parseCommand(string cmd){ //funzione di estrapolazione dei parametri del co
 		//throw invalid_argument("--- Tipo di comando inesistente ---");
 	}
 }
+
+#endif
