@@ -9,6 +9,8 @@
 #include "Interface.h"
 using namespace std;
 
+Interface::Interface(){};
+
 int Interface::calculateTime(string time_format){ 
 	int time_min;
 	string hours = time_format.substr(0,2);
