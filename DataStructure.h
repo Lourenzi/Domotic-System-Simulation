@@ -4,6 +4,11 @@
 //
 //  Created by Eduardo on 31/12/24.
 //
+
+#ifndef DEVICE_H
+#define DEVICE_H
+
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -18,7 +23,7 @@ class DataStructure
 private:
     vector<EntryStructure> eventi;
 public:
-    DataStructure(); /*viene creato allínizio quando non ci sono eventi ancora eseguiti*/
+    DataStructure(){}; /*viene creato allínizio quando non ci sono eventi ancora eseguiti*/
     
     void set (Device device, bool status, int time);
     void set (Device device, int start_device, int stop_device);
@@ -28,3 +33,5 @@ public:
     
     void sort(EntryStructure entry);
 };
+
+#endif
