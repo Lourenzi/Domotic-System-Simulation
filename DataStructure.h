@@ -5,8 +5,8 @@
 //  Created by Eduardo on 31/12/24.
 //
 
-#ifndef DEVICE_H
-#define DEVICE_H
+#ifndef DATASTRUCTURE_H
+#define DATASTRUCTURE_H
 
 
 #include <iostream>
