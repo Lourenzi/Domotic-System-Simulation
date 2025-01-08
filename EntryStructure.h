@@ -25,6 +25,12 @@ public:
     int get_keyTime() {return keyTime;};
     string get_element() {return element;};
     bool get_status() {return on;};
+    
+    EntryStructure copy (EntryStructure vecchio)
+    {
+        EntryStructure nuovo (vecchio.get_keyTime(), vecchio.get_element(), vecchio.get_status());
+        return nuovo;
+    };
 };
-#endif
 
+#endif
