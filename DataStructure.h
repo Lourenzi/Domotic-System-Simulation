@@ -23,7 +23,7 @@ class DataStructure
 private:
     vector<EntryStructure> eventi;
 public:
-    DataStructure(){}; /*viene creato allínizio quando non ci sono eventi ancora eseguiti*/
+    DataStructure(); /*viene creato allínizio quando non ci sono eventi ancora eseguiti*/
     
     void set (Device device, bool status, int time);
     void set (Device device, int start_device, int stop_device);
