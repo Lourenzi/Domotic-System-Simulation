@@ -16,7 +16,7 @@ using namespace std;
 
 class Interface{
 	public:
-		Interface(){};
+		Interface();
 		void parseCommand(string cmd, ofstream& log);
 	private:
 		DataStructure data;
