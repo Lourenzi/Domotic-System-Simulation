@@ -33,7 +33,7 @@ public:
     void set (Device device, int start_device);
     void rm (Device device);
     
-    vector<string> get_device_in_order ();
+    vector<EntryAccesi> get_device_in_order ();
     
     void stampa ();
     
