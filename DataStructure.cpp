@@ -22,6 +22,11 @@ ListaDevice lista;
 
 DataStructure::DataStructure() {}; /*creo la linea temporale*/  /*vector degli elementi e gia vuoto*/
 
+Time get_Time()
+{
+    return tempo;
+}
+
 void DataStructure::sort(EntryStructure entry) /*riordinare il vettore in base al tempo che caratterizza ogni evento*/
 {
     int timeEntry = entry.get_keyTime();    /*momento di quel evento*/
