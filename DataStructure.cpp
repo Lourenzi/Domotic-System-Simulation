@@ -37,9 +37,9 @@ void DataStructure::sort(EntryStructure entry) /*riordinare il vettore in base a
     eventi.insert(eventi.begin() + counter, entry); /*aggiunge una locazione nel vettore pirma di quello che accadrebbe subito dopo*/
 }
 
-vector<string> DataStructure::get_device_in_order()
+vector<EntryAccesi> DataStructure::get_device_in_order()
 {
-    vector<string> accensioni;
+    vector<EntryAccesi> accensioni;
     int limite = 0;
     for (int i=0; i<eventi.size(); i++)
     {
@@ -53,13 +53,14 @@ vector<string> DataStructure::get_device_in_order()
     {
         if (eventi[i].get_status() == true)
         {
-            accensioni.insert(accensioni.begin(), eventi[i].get_element());
+            EntryAccesi info (eventi[i].get_element(), eventi[i].get_power());
+            accensioni.insert(accensioni.begin(), info);
         }
         else
         {
             for (int f=0; f<accensioni.size(); f++)
             {
-                if (accensioni[f] == eventi[i].get_element())
+                if (accensioni[f].get_Name() == eventi[i].get_element())
                 {
                     for (int j = f; j<accensioni.size()-1; j++)
                     {
@@ -88,7 +89,7 @@ void DataStructure::set(Device device, bool on)  /*viene settato un dispositivo 
         if (device.is_device_on()) throw invalid_argument("oggetto gia acceso");   /*se e gia acceso non posso accenderlo*/
         else    /*seno*/
         {
-            EntryStructure entryInizio (tempo.get_currentTime(), device.get_device_name(), true/*accendo*/); /*creo lévento accensione dispositivo*/
+            EntryStructure entryInizio (tempo.get_currentTime(), device.get_device_name(), true/*accendo*/, device.get_device_consume()); /*creo lévento accensione dispositivo*/
             
             /*cambio le informazioni dellóggetto*/
             device.modify_device_start(tempo.get_currentTime());
@@ -118,7 +119,7 @@ void DataStructure::set(Device device, bool on)  /*viene settato un dispositivo 
                 }
                 
                 cout << "durata ciclo dispositivo: " << device.get_device_timer() << endl;
-                EntryStructure entryFine (tempo.get_currentTime() + device.get_device_timer(), device.get_device_name(), false);
+                EntryStructure entryFine (tempo.get_currentTime() + device.get_device_timer(), device.get_device_name(), false, device.get_device_consume());
                 
                 /*aggiorno le informazioni del device*/
                 device.modify_device_end(tempo.get_currentTime() + device.get_device_timer());
@@ -148,7 +149,7 @@ void DataStructure::set(Device device, bool on)  /*viene settato un dispositivo 
                     }
                 }
                 
-                EntryStructure entryFine ((60*24)+1, device.get_device_name(), false/*spengo*/);    /*creo lévento spegnimento dispositivo*/
+                EntryStructure entryFine ((60*24)+1, device.get_device_name(), false/*spengo*/, device.get_device_consume());    /*creo lévento spegnimento dispositivo*/
                 
                 device.modify_device_end((60*24)+1);
                 
@@ -176,7 +177,7 @@ void DataStructure::set(Device device, bool on)  /*viene settato un dispositivo 
                     break;
                 }
             }
-            EntryStructure entryFine (tempo.get_currentTime(), device.get_device_name(), false/*spengo*/); /*spegno il dispositivo in un determinato momento (ora)*/
+            EntryStructure entryFine (tempo.get_currentTime(), device.get_device_name(), false/*spengo*/, device.get_device_consume()); /*spegno il dispositivo in un determinato momento (ora)*/
             
             device.modify_device_end(tempo.get_currentTime()); /*modifico lo spegnimetno dell dispositivo a ora*/
             
@@ -269,9 +270,9 @@ void DataStructure::set (Device device, int moment) /*accesione programmata*/
             }
         }
         
-        EntryStructure entryInizio (moment, device.get_device_name(), true);
+        EntryStructure entryInizio (moment, device.get_device_name(), true, device.get_device_consume());
         sort (entryInizio);
-        EntryStructure entryFine ((60*24)+1, device.get_device_name(), false);
+        EntryStructure entryFine ((60*24)+1, device.get_device_name(), false, device.get_device_consume());
         sort (entryFine);
     }
     else
@@ -308,8 +309,8 @@ void DataStructure::set (Device device, int start_device, int stop_device) /*set
     
     if (device.is_device_automatic()) throw invalid_argument("ha un tempo prefissato");
 
-    EntryStructure entryInizio (start_device, device.get_device_name(), true); /*creo la entry che mi rapprsenta láccensione*/
-    EntryStructure entryFine (stop_device, device.get_device_name(), false); /*creo la entry che mi rappresenta lo spegnimento*/
+    EntryStructure entryInizio (start_device, device.get_device_name(), true, device.get_device_consume()); /*creo la entry che mi rapprsenta láccensione*/
+    EntryStructure entryFine (stop_device, device.get_device_name(), false, device.get_device_consume()); /*creo la entry che mi rappresenta lo spegnimento*/
     
     int time1 = -1;
     int time2 = -1;   /*salvo il momento (potevo salvarmi anche solamente la posizione ma chill)*/
@@ -378,7 +379,7 @@ void DataStructure::rm (Device device) /*devo mettere now seno potrei togliere u
             break;
         }
     }
-    EntryStructure entryFine ((60*24)+1, device.get_device_name(), false);
+    EntryStructure entryFine ((60*24)+1, device.get_device_name(), false, device.get_device_consume());
     /*metto (60*24)+1 perche non e un orario ma e lidea che resta acceso finche non lo spengo io*/
     sort(entryFine);
 }
