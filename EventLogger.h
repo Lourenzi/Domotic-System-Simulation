@@ -14,7 +14,7 @@ class EventLogger{
 	public:
 		EventLogger();
 	private:
-		string format_time(int time_min){
+		string format_time(int time_min){ //funzione helper per formattare il tempo (da minuti dalle 00:00)
 			string time_formatted, mm, hh;
 			int mins = time_min%60;
 			int hours = time_min/60;
