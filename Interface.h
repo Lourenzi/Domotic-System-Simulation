@@ -18,7 +18,9 @@ class Interface{
 	public:
 		Interface();
 		void parseCommand(string cmd, ofstream& log);
+
 	private:
+		Time time;
 		DataStructure data;
 		int calculateTime(string time_format);
 		void setTime(string time_format);
@@ -32,6 +34,8 @@ class Interface{
 		void resetAll();
 		bool isStatusValid(string status);
 		bool isTimeFormatValid(string time_format);
+		bool isDeviceNameValid(string device_name);
+
 };
 
 
