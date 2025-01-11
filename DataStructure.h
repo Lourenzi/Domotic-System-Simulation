@@ -37,6 +37,7 @@ public:
     
     void stampa ();
     
+    Time get_Time();
     void sort(EntryStructure entry);
     void elimina(int i);
 };
