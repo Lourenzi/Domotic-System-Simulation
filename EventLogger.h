@@ -26,17 +26,62 @@ class EventLogger{
 			return time_formatted;
 		}
 
+		double calculateConsume(double consume, int time_on){
+			
+		}
+
 		void log_updateTime(Time& time, ofstream& log){
 			string time_formatted = format_time(time.get_currentTime());
 			cout<<"["<<time_formatted<<"] L'orario attuale è "<<time_formatted<<endl;
 			log<<"["<<time_formatted<<"] L'orario attuale è "<<time_formatted;  
 		}
+
+		void log_updateStatus(Time& time, ofstream& log, string device_name, string status){
+			string time_formatted = format_time(time.get_currentTime());
+			if(status == "on"){
+				cout<<"["<<time_formatted<<"] Il dispositivo "<<device_name<<" si e' acceso"<<endl;
+				log<<"["<<time_formatted<<"] Il dispositivo "<<device_name<<" si e' acceso"<<endl;
+			}
+			else{
+				cout<<"["<<time_formatted<<"] Il dispositivo '"<<device_name<<"' si e' spento"<<endl;
+				log<<"["<<time_formatted<<"] Il dispositivo '"<<device_name<<"' si e' spento"<<endl;
+			}
+		}
+
+		void log_updateStatus(Time& time, ofstream& log, string device_name, bool on){
+			string time_formatted = format_time(time.get_currentTime());
+			if(on){
+				cout<<"["<<time_formatted<<"] Il dispositivo '"<<device_name<<"'' si e' acceso"<<endl;
+				log<<"["<<time_formatted<<"] Il dispositivo '"<<device_name<<"' si e' acceso"<<endl;
+			}
+			else{
+				cout<<"["<<time_formatted<<"] Il dispositivo '"<<device_name<<"' si e' spento"<<endl;
+				log<<"["<<time_formatted<<"] Il dispositivo '"<<device_name<<"' si e' spento"<<endl;
+			}
+		}
+
+		void log_updateTimer(Time& time, ofstream& log, string device_name, int end_time, int start_time){
+			string time_formatted = format_time(time.get_currentTime());
+			string end_time_formatted = format_time(end_time);
+			string start_time_formatted = format_time(start_time);
+			cout<<"["<<time_formatted<<"] Impostato un timer per il dispositivo '"<<device_name<<"' dalle "<<start_time_formatted<<" alle "<<end_time_formatted<<endl;
+			log<<"["<<time_formatted<<"] Impostato un timer per il dispositivo '"<<device_name<<"' dalle "<<start_time_formatted<<" alle "<<end_time_formatted<<endl;
+		}
+
+		void log_removeTimer(Time& time, ofstream& log, string device_name){
+			string time_formatted = format_time(time.get_currentTime());
+			cout<<"["<<time_formatted<<"] Rimosso il timer dal dispositivo '"<<device_name<<"'"<<endl;
+			log<<"["<<time_formatted<<"] Rimosso il timer dal dispositivo '"<<device_name<<"'"<<endl;
+		}
+
+		void log_showConsume(Time& time, ofstream& log, string device_name, double consume, int time_on){
+			string time_formatted = format_time(time.get_currentTime());
+			double total_consume = ((double)time_on/60)*consume + (((double)time_on%60)/60)*consume;
+			cout<<"["<<time_formatted<<"] Il dispositivo ha attualmente consumato '"<<total_consume<<"' kWh"<<endl;
+			log<<"["<<time_formatted<<"] Il dispositivo ha attualmente consumato '"<<total_consume<<"' kWh"<<endl;
+		}
 		
-		void log_updateStatus(ofstream& log);
-		void log_updateTimer(ofstream& log);
-		void log_removeTimer(ofstream& log);
-		void log_showConsume(ofstream& log);
-		void log_showConsumeTotal(ofstream& log);
+		void log_showConsumeTotal(Time& time, ofstream& log);
 		
 }
 
