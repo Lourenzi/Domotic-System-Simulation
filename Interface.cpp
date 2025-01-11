@@ -7,7 +7,10 @@
 #include <cctype>
 #include "DataStructure.h"
 #include "Interface.h"
+#include "ListaDevice.h"
 using namespace std;
+
+ListaDevice listaDevice;
 
 Interface::Interface(){};
 
@@ -29,6 +32,8 @@ void Interface::setStatus(string device_name, string status){
 }
 
 void Interface::setStatus(string device_name, string time_start, string time_stop){
+	
+
 	cout<<"setStatus ON - "<<device_name<<" "<<time_start<<" "<<time_stop<<endl;
 }
 
@@ -80,6 +85,19 @@ bool Interface::isTimeFormatValid(string time_format){
 	return timeValid;
 }
 
+bool Interface::isDeviceNameValid(string device_name){
+	bool deviceValid = false;
+	vector<Device> devices = listaDevice.get_vector();
+	for(int i=0; i<devices.size(); i++){
+		if(devices.at(i).get_device_name() == device_name){
+			deviceValid = true;
+		}
+	}
+	return deviceValid;
+}
+
+
+
 void Interface::parseCommand(string cmd, ofstream& log){ //funzione di estrapolazione dei parametri del comando da terminale
 	vector<string> parameters; //vector indicizzato cosi' : [tipo di comando] --> 0 , [nome device/time var] --> 1 , [status/ora start timer/ora set] --> 2 , [ora stop timer] --> 3
 	int i_start = 0; // indice di inizio parola i-esima della stringa comando
@@ -101,25 +119,28 @@ void Interface::parseCommand(string cmd, ofstream& log){ //funzione di estrapola
 				if(parameters.size() == 3){
 					if(isTimeFormatValid(parameters.at(2))){
 						setTime(parameters.at(2));	
-					}
-					else{ cout<<"--Formato dell'orario errato--"<<endl; }
+					
+					}else{ cout<<"--Formato dell'orario errato--"<<endl; }
 				}
 				else{ cout<<"--Eccessivi o insufficienti parametri immessi--"<<endl; }
 			}
 			else{   //se è un comando set ${DEVICENAME}, trattato nelle sue due versioni
 				if(parameters.size() <= 4 && parameters.size() > 2){
-					if(parameters.size() == 4){
-						if(isTimeFormatValid(parameters.at(2)) && isTimeFormatValid(parameters.at(3))){
-							setStatus(parameters.at(1), parameters.at(2), parameters.at(3));
+					if(isDeviceNameValid(parameters.at(1))){	
+						if(parameters.size() == 4){
+							if(isTimeFormatValid(parameters.at(2)) && isTimeFormatValid(parameters.at(3))){
+								setStatus(parameters.at(1), parameters.at(2), parameters.at(3));
+							}
+							else{ cout<<"--Formato dell'orario errato--"<<endl; } 
 						}
-						else{ cout<<"--Formato dell'orario errato--"<<endl; } 
-					}
-					else{
-						if(isStatusValid(parameters.at(2))) {
-							setStatus(parameters.at(1), parameters.at(2));
+						else{
+							if(isStatusValid(parameters.at(2))) {
+								setStatus(parameters.at(1), parameters.at(2));
+							}
+							else{ cout<<"--Status non settabile--"<<endl; }
 						}
-						else{ cout<<"--Status non settabile--"<<endl; }
 					}
+					else{ cout<<"--Nome dispositivo non riconosciuto--"<<endl;}
 				}
 				else{ cout<<"--Eccessivi o insufficienti parametri immessi--"<<endl; }
 			}
@@ -128,7 +149,10 @@ void Interface::parseCommand(string cmd, ofstream& log){ //funzione di estrapola
 		if(cmd_type == "show"){
 			if(parameters.size() <= 2){
 				if(parameters.size() == 2){  //se è un comando show ${DEVICENAME}
-					showConsumption(parameters.at(1));
+					if(isDeviceNameValid(parameters.at(1))){
+						showConsumption(parameters.at(1));
+					}
+					else{cout<<"--Nome dispositivo non riconosciuto--"<<endl;}
 				}
 				else{  //comando show complessivo
 					showConsumption();
@@ -139,7 +163,10 @@ void Interface::parseCommand(string cmd, ofstream& log){ //funzione di estrapola
 
 		if(cmd_type == "rm"){
 			if(parameters.size() == 2){
-				removeDevice(parameters.at(1));	
+				if(isDeviceNameValid(parameters.at(1))){
+					removeDevice(parameters.at(1));	
+				}
+				else{cout<<"--Nome dispositivo non riconosciuto--"<<endl;}
 			}
 			else{ cout<<"--Eccessivi o insufficienti parametri immessi--"<<endl; }	
 		}
