@@ -39,6 +39,7 @@ public:
     
     void accender();
     
+    void set_Time(int newTime);
     Time get_Time();
     void sort(EntryStructure entry);
     void elimina(int i);
