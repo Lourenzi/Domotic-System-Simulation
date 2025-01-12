@@ -35,8 +35,11 @@ void DataStructure::set_Time(int newTime)
     cout<<endl;
     
     tempo.set_time(newTime);
+
     accender();
     get_device_in_order();
+
+    checkPower();
 }
 
 void DataStructure::sort(EntryStructure entry) /*riordinare il vettore in base al tempo che caratterizza ogni evento*/
@@ -264,6 +267,8 @@ void DataStructure::set(Device device, bool on)  /*viene settato un dispositivo 
             sort (entryFine);   /*deve essere riordinato allínterno dello storico eventi*/
         }
     }
+
+    checkPower();
 }
 
 void DataStructure::set (Device device, int moment) /*accesione programmata*/
