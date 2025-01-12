@@ -62,6 +62,17 @@ public:
         lista_Device.push_back(televisore); name.push_back("televisore");
     }
     
+    Device get_Device_by_name(string device_name){
+        int i=0;
+        Device d;
+        while(i < lista_Device.size()){
+            if(lista_Device.at(i).get_device_name() == device_name){
+              d = lista_Device.at(i);
+            }
+            i++;
+        }
+        return d;
+    }
     vector<Device> get_vector() {return lista_Device;};
     vector<string> get_lista_name() {return name;};
 };
