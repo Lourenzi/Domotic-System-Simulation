@@ -19,6 +19,7 @@ using namespace std;
 
 Time tempo;
 ListaDevice lista;
+vector<Device> listone = lista.get_vector();
 
 DataStructure::DataStructure() {}; /*creo la linea temporale*/  /*vector degli elementi e gia vuoto*/
 
@@ -30,16 +31,32 @@ Time get_Time()
 void DataStructure::sort(EntryStructure entry) /*riordinare il vettore in base al tempo che caratterizza ogni evento*/
 {
     int timeEntry = entry.get_keyTime();    /*momento di quel evento*/
-    int counter = 0;
-    for (int i =0; i<eventi.size(); i++)
+    if (entry.get_keyTime() == (60*24)+1)
     {
-        if (eventi[i].get_keyTime()>=timeEntry) /*prende il primo piu grande perche poi brekka*/
-        {
-            counter = i;
-            break;
-        }
+        eventi.insert(eventi.end(), entry);
     }
-    eventi.insert(eventi.begin() + counter, entry); /*aggiunge una locazione nel vettore pirma di quello che accadrebbe subito dopo*/
+    else
+    {
+        int counter = 0;
+        for (int i =0; i<eventi.size(); i++)
+        {
+            if (eventi[i].get_keyTime() >= timeEntry) /*prende il primo piu grande perche poi brekka*/
+            {
+                counter = i;
+                break;
+            }
+            
+            if (timeEntry > eventi[i].get_keyTime() && i == eventi.size()-1)
+            {
+                cout << "per riordinare " << entry.get_element() << " sono entrato qui " << endl;
+                counter = (int)eventi.size();
+                break;
+            }
+        }
+        cout<<"posizione alla quale inserisco la entry " << counter<<endl;
+        eventi.insert(eventi.begin() + counter, entry); /*aggiunge una locazione nel vettore pirma di quello che accadrebbe subito dopo*/
+    }
+    cout<<endl;
 }
 
 vector<EntryAccesi> DataStructure::get_device_in_order()
@@ -53,11 +70,13 @@ vector<EntryAccesi> DataStructure::get_device_in_order()
             limite++;
         }
     }
+    cout<<"-----------------------"<<limite<<endl;
 
     for (int i =0; i< limite; i++)
     {
         if (eventi[i].get_status() == true)
         {
+            cout<<"sono entrato qui quessta volta";
             EntryAccesi info (eventi[i].get_element(), eventi[i].get_power());
             accensioni.insert(accensioni.begin(), info);
         }
@@ -89,6 +108,7 @@ void DataStructure::elimina (int f)
 
 void DataStructure::set(Device device, bool on)  /*viene settato un dispositivo on o off*/   /*ho bisogno di time perche non so quando siamo*/
 {
+    accender();
     if (on) /*caso in cui lo debba accendere*/
     {
         if (device.is_device_on()) throw invalid_argument("oggetto gia acceso");   /*se e gia acceso non posso accenderlo*/
@@ -195,10 +215,12 @@ void DataStructure::set(Device device, bool on)  /*viene settato un dispositivo 
 
 void DataStructure::set (Device device, int moment) /*accesione programmata*/
 {
+    accender();
     if (moment < tempo.get_currentTime()) throw invalid_argument("non si puo aplicare una pianificazion al passato");
     
     if (device.is_device_automatic())
     {
+        cout<<"il dispositivo e automatico"<<endl;
         int posizione_inizio = 0;
         int posizione_fine = 0;
         for (int i =0; i< eventi.size(); i++)
@@ -212,66 +234,71 @@ void DataStructure::set (Device device, int moment) /*accesione programmata*/
                 posizione_fine ++;
             }
         }
+        cout<<"posisizione inizio: " << posizione_inizio << " posizione fine: " << posizione_fine << endl;
         
         //posso avere sia la fine che linizio di una programmazione allínterno del mio intervallo
         //intanto vediamo se ce una delle due
-        bool entrato = false;
-        for (int i = posizione_inizio; i <= posizione_fine; i++) //controllo che non ci fosse gia una pianificazione impostata
+        //bool entrato = false;
+        if (posizione_inizio != posizione_fine)
         {
-            if (eventi[i].get_element() == device.get_device_name() && eventi[i].get_keyTime() > moment)
+            for (int i = posizione_inizio; i <= posizione_fine; i++) //controllo che non ci fosse gia una pianificazione impostata
             {
-                //ce una programmazione prevista per dopo il momento che ho detto io
-                //e una programmazione di accensione o spegnimento?
-                if (eventi[i].get_status()) //programmazione di accensione
+                cout<<"giriamo in tondo"<<endl;
+                if (eventi[i].get_element() == device.get_device_name() && eventi[i].get_keyTime() > moment)
                 {
-                    for (int f = i; f < eventi.size()-1; f++)
+                    cout<<"entro nellíf"<<endl;
+                    //ce una programmazione prevista per dopo il momento che ho detto io
+                    //e una programmazione di accensione o spegnimento?
+                    if (eventi[i].get_status()) //programmazione di accensione
                     {
-                        eventi[f] = eventi[f+1];
-                    }
-                    //devo cercare dopo la entry di spegnimento e toglierla
-                    for (int f = i; f < eventi.size(); f++)
-                    {
-                        if (eventi[f].get_element() == device.get_device_name())
+                        for (int f = i; f < eventi.size()-1; f++)
                         {
-                            for (int j = f; j < eventi.size()-1; j++)
+                            eventi[f] = eventi[f+1];
+                        }
+                        //devo cercare dopo la entry di spegnimento e toglierla
+                        for (int f = i; f < eventi.size(); f++)
+                        {
+                            if (eventi[f].get_element() == device.get_device_name())
                             {
-                                eventi[j] = eventi[j+1];
+                                for (int j = f; j < eventi.size()-1; j++)
+                                {
+                                    eventi[j] = eventi[j+1];
+                                }
                             }
                         }
                     }
-                }
-                else //programmazione di spegnimento
-                {
-                    //devo cercare la entry di accensione ma devo fare attenzione che sia dopo current time
-                    //prima di togliere le entry
-                    bool cancellare = true;
-                    int posizione_iniziale = 0;
-                    for (int f = i; f > 0; f--)
+                    else //programmazione di spegnimento
                     {
-                        if (eventi[f].get_element() == device.get_device_name())
+                        //devo cercare la entry di accensione ma devo fare attenzione che sia dopo current time
+                        //prima di togliere le entry
+                        bool cancellare = true;
+                        int posizione_iniziale = 0;
+                        for (int f = i; f > 0; f--)
                         {
-                            posizione_iniziale = f;
-                            if (eventi[f].get_keyTime() >= tempo.get_currentTime())
+                            if (eventi[f].get_element() == device.get_device_name())
                             {
-                                cancellare = false;
-                                throw invalid_argument("si sta posizionando una programmazione prima che quella precedente finisca");
+                                posizione_iniziale = f;
+                                if (eventi[f].get_keyTime() >= tempo.get_currentTime())
+                                {
+                                    cancellare = false;
+                                    throw invalid_argument("si sta posizionando una programmazione prima che quella precedente finisca");
+                                }
                             }
                         }
+                        //posso cancellare entrambe le entry
+                        for (int f = i; f < eventi.size()-1; f++)
+                        {
+                            eventi[f] = eventi[f+1];
+                        }
+                        eventi.pop_back();
+                        
+                        for (int f = posizione_iniziale; f < eventi.size()-1; f++)
+                        {
+                            eventi[f] = eventi[f+1];
+                        }
+                        eventi.pop_back();
                     }
-                    //posso cancellare entrambe le entry
-                    for (int f = i; f < eventi.size()-1; f++)
-                    {
-                        eventi[f] = eventi[f+1];
-                    }
-                    eventi.pop_back();
-                    
-                    for (int f = posizione_iniziale; f < eventi.size()-1; f++)
-                    {
-                        eventi[f] = eventi[f+1];
-                    }
-                    eventi.pop_back();
                 }
-                
             }
         }
         
@@ -298,7 +325,7 @@ void DataStructure::set (Device device, int moment) /*accesione programmata*/
                     if (eventi[f].get_element() == device.get_device_name() && eventi[i].get_status() == false)
                     {
                         //elimino questa entry
-                        eventi.erase(f);
+                        elimina(f);
                     }
                 }
             }
@@ -308,67 +335,90 @@ void DataStructure::set (Device device, int moment) /*accesione programmata*/
 
 void DataStructure::set (Device device, int start_device, int stop_device) /*setto accensione e spegnimento*/
 {
+    accender();
     /*modifico informazioni di accensione e spegnimento del dispositivo*/
-    device.modify_device_start(start_device);
-    device.modify_device_end(stop_device);
     
     if (device.is_device_automatic()) throw invalid_argument("ha un tempo prefissato");
+    if (stop_device <= start_device) throw invalid_argument("non e possibile spegnere il dispositivo prima che si accendi");
 
     EntryStructure entryInizio (start_device, device.get_device_name(), true, device.get_device_consume()); /*creo la entry che mi rapprsenta láccensione*/
     EntryStructure entryFine (stop_device, device.get_device_name(), false, device.get_device_consume()); /*creo la entry che mi rappresenta lo spegnimento*/
-    
-    int time1 = -1;
-    int time2 = -1;   /*salvo il momento (potevo salvarmi anche solamente la posizione ma chill)*/
-    int position_time1 = 0;
-    int position_time2 = 0; /*cosi so da dove ho preso le informazioni*/
-    
-    bool entrato1 = false;
-    bool entrato2 = false;
-    
-    for (int i =0; i<eventi.size(); i++)
+
+    if (eventi.empty())
     {
-        if (eventi[i].get_element() == device.get_device_name() && eventi[i].get_status() == true)
-        {
-            time1 = eventi[i].get_keyTime();
-            position_time1 = i;
-            entrato1 = true;
-        }
-        if (eventi[i].get_element() == device.get_device_name() && eventi[i].get_status() == false)
-        {
-            time2 = eventi[i].get_keyTime();
-            position_time2 = i;
-            entrato2 = true;
-        }
+        sort(entryInizio);
+        sort(entryFine);
+    }
+    else
+    {
+        int position_start = 0;
+        int position_end = 0; /*cosi so da dove ho preso le informazioni*/
         
-        if (entrato1 && entrato2)
+        for (int i =0; i<eventi.size(); i++) /*trovo la posizione dove si trova la entry*/
         {
-            if (!(start_device<time1 && stop_device<time1) && !(start_device>time2 && stop_device>time2))
+            if (eventi[i].get_keyTime() <= start_device)
             {
-                for (int i = position_time2; i<eventi.size()-1; i++)
-                {
-                    eventi[i] = eventi[i+1];
-                }
-                
-                eventi.pop_back();
-                
-                for (int i = position_time1; i<eventi.size()-1; i++)
-                {
-                    eventi[i] = eventi[i+1];
-                }
-                
-                eventi.pop_back();
-                break;
+                position_start = i;
             }
-            else {entrato1 = false; entrato2 = false;}
+            if (eventi[i].get_keyTime() <= stop_device)
+            {
+                position_end = i;
+            }
+        }
+        cout<<"fino a qui tutto apposto"<<endl;
+        /*controlllo se in mezzo a queste entry ci sono delle programmazioni dello stesso oggetto*/
+        for (int i = position_start; i <= position_end; i++)
+        {
+            if (eventi[i].get_element() == device.get_device_name()) /*ce una programmazione per questo dispositivo*/
+            {
+                if (eventi[i].get_status()) /*progrmmazione di accensione*/
+                {
+                    cout<<"------------------HO USATO IL PRIMO-------------------"<<endl;
+                    for (int f = i; f< eventi.size(); f++)
+                    {
+                        if (eventi[f].get_element() == device.get_device_name() && eventi[f].get_status() == false)
+                        {
+                            elimina(i);
+                            elimina(f);
+                            sort(entryInizio);
+                            sort(entryFine);
+                        }
+                    }
+                }
+                else /*accensione prima della mia */
+                {
+                    cout<<"------------------HO USATO IL SECONDO-------------------"<<endl;
+                    /*controllo che start non sia >= a current time*/
+                    for (int f = position_start; f>0; f--)
+                    {
+                        cout<<"cado in questo caso"<<endl;
+                        if (eventi[f].get_element() == device.get_device_name() && eventi[f].get_status() == true)
+                        {
+                            if (eventi[f].get_keyTime() > tempo.get_currentTime())
+                            {
+                                /*posso ancora togliere questa programmazione*/
+                                elimina(i);
+                                elimina(f);
+                                sort(entryInizio);
+                                sort(entryFine);
+                            }
+                            else
+                            {
+                                /*programmazione e gia in corso, non posso aggiungere le programmazione corrente*/
+                                cout<<"programmazione di "<<device.get_device_name()<<" non puo essere aggiunta perche in contrasto con quella delle: ";
+                                cout<<eventi[f].get_keyTime()<< " impostata fino alle "<<eventi[i].get_keyTime()<<endl;
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
-    /*se non sono in uno dei tre casi sopra vuol dire che il dispositivo non fa nulla in questo frangente di tempo*/
-    sort(entryInizio); /*butto dentro e riordino*/
-    sort(entryFine);
 }
 
 void DataStructure::rm (Device device) /*devo mettere now seno potrei togliere uno spegnimento passato e non ha senso*/
 {
+    accender();
     device.modify_device_end((60*24)+1);
     
     for (int i = tempo.get_currentTime(); i< eventi.size(); i++)    /*cerco in cio che accadra da now in poi*/
@@ -389,16 +439,43 @@ void DataStructure::rm (Device device) /*devo mettere now seno potrei togliere u
     sort(entryFine);
 }
 
+void DataStructure::accender()
+{
+    for (int i = 0; i< eventi.size(); i++)
+    {
+        if (eventi[i].get_keyTime() <= tempo.get_currentTime() && eventi[i].get_status() == true)
+        {
+            for (int f =0; f<listone.size(); f++)
+            {
+                if (eventi[i].get_element() == listone[f].get_device_name() && listone[f].is_device_on() == false)
+                {
+                    listone[f].modify_device_status(true);
+                }
+            }
+        }
+        else if (eventi[i].get_keyTime() <= tempo.get_currentTime() && eventi[i].get_status() == false)
+        {
+            for (int f =0; f<listone.size(); f++)
+            {
+                if (eventi[i].get_element() == listone[f].get_device_name() && listone[f].is_device_on() == true)
+                {
+                    listone[f].modify_device_status(false);
+                }
+            }
+        }
+    }
+}
+
 void DataStructure::stampa()
 {
+    cout<<"sono dentro stampa, eventi.size(): "<< eventi.size() << endl;
     for (int i =0; i<eventi.size(); i++)
     {
         int orario = eventi[i].get_keyTime();
         int ora = orario / 60;
         int minuti = orario % 60;
         
-        if (ora == 24) {cout<< "[00:00]";}
-        else cout<<"["<< ora << ":" << minuti << "]";
+        cout<<"["<< ora << ":" << minuti << "]";
         
         string acceso;
         if (eventi[i].get_status() == true) acceso = " si e acceso ";
