@@ -122,6 +122,35 @@ vector<EntryAccesi> DataStructure::get_device_in_order()
     return accensioni;
 }
 
+double DataStructure::getCurrentPower(void)
+{
+    vector<EntryAccesi> DeviceOn = get_device_in_order();
+    double currentPower = 0;
+
+    for(int i = DeviceOn.size()-1; i > -1; i--)
+    {
+        currentPower = currentPower + DeviceOn[i].get_Power();
+    }
+
+    return currentPower;
+}
+
+void DataStructure::checkPower(void) //vieni chiamata in set_time
+{
+	vector<EntryAccesi> DispositiviAccesi = get_device_in_order();
+
+	while(getCurrentPower()>3.5) //spegne i dispositivi 
+	{
+			string dev_name = DispositiviAccesi.back().get_Name();
+			DispositiviAccesi.pop_back();
+
+            Device dev = lista.get_Device_by_name(dev_name);
+            set(dev, false);
+
+			//spegnere il dispotivo
+	}
+}
+
 void DataStructure::elimina (int f)
 {
     for (int i = f; i < eventi.size()-1; i++)

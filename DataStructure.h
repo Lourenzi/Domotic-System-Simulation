@@ -34,6 +34,8 @@ public:
     void rm (Device device);
     
     vector<EntryAccesi> get_device_in_order ();
+    double getCurrentPower(void);
+    void checkPower(void);
     
     void stampa ();
     
