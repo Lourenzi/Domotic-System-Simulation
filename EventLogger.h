@@ -12,28 +12,12 @@
 
 class EventLogger{
 	public:
-		EventLogger();
-	private:
-		string format_time(int time_min){ //funzione helper per formattare il tempo (da minuti dalle 00:00)
-			string time_formatted, mm, hh;
-			int mins = time_min%60;
-			int hours = time_min/60;
-			if(mins < 10) {mm = "0" + to_string(mins);}
-			else {mm = to_string(mins);}
-			if(hours < 10) {hh = "0" + to_string(hours);}
-			else {hh = to_string(hours);}
-			time_formatted = hh + ":" + mm;
-			return time_formatted;
-		}
-
-		double calculateConsume(double consume, int time_on){
-			
-		}
+		EventLogger(){};
 
 		void log_updateTime(Time& time, ofstream& log){
 			string time_formatted = format_time(time.get_currentTime());
 			cout<<"["<<time_formatted<<"] L'orario attuale è "<<time_formatted<<endl;
-			log<<"["<<time_formatted<<"] L'orario attuale è "<<time_formatted;  
+			log<<"["<<time_formatted<<"] L'orario attuale è "<<time_formatted<<endl;  
 		}
 
 		void log_updateStatus(Time& time, ofstream& log, string device_name, string status){
@@ -41,18 +25,6 @@ class EventLogger{
 			if(status == "on"){
 				cout<<"["<<time_formatted<<"] Il dispositivo "<<device_name<<" si e' acceso"<<endl;
 				log<<"["<<time_formatted<<"] Il dispositivo "<<device_name<<" si e' acceso"<<endl;
-			}
-			else{
-				cout<<"["<<time_formatted<<"] Il dispositivo '"<<device_name<<"' si e' spento"<<endl;
-				log<<"["<<time_formatted<<"] Il dispositivo '"<<device_name<<"' si e' spento"<<endl;
-			}
-		}
-
-		void log_updateStatus(Time& time, ofstream& log, string device_name, bool on){
-			string time_formatted = format_time(time.get_currentTime());
-			if(on){
-				cout<<"["<<time_formatted<<"] Il dispositivo '"<<device_name<<"'' si e' acceso"<<endl;
-				log<<"["<<time_formatted<<"] Il dispositivo '"<<device_name<<"' si e' acceso"<<endl;
 			}
 			else{
 				cout<<"["<<time_formatted<<"] Il dispositivo '"<<device_name<<"' si e' spento"<<endl;
@@ -76,13 +48,35 @@ class EventLogger{
 
 		void log_showConsume(Time& time, ofstream& log, string device_name, double consume, int time_on){
 			string time_formatted = format_time(time.get_currentTime());
-			double total_consume = ((double)time_on/60)*consume + (((double)time_on%60)/60)*consume;
-			cout<<"["<<time_formatted<<"] Il dispositivo ha attualmente consumato '"<<total_consume<<"' kWh"<<endl;
-			log<<"["<<time_formatted<<"] Il dispositivo ha attualmente consumato '"<<total_consume<<"' kWh"<<endl;
+			double total_consume = ((double)time_on/60)*consume + ((double)(time_on%60)/60)*consume;
+			if(total_consume >= 0){
+				cout<<"["<<time_formatted<<"] Il dispositivo ha attualmente consumato '"<<total_consume<<"' kWh"<<endl;
+				log<<"["<<time_formatted<<"] Il dispositivo ha attualmente consumato '"<<total_consume<<"' kWh"<<endl;	
+			}
+			else{
+				cout<<"["<<time_formatted<<"] Il dispositivo ha attualmente prodotto '"<<(-1)*total_consume<<"' kWh"<<endl;
+				log<<"["<<time_formatted<<"] Il dispositivo ha attualmente prodotto '"<<(-1)*total_consume<<"' kWh"<<endl;	
+			}
+			
 		}
 		
-		void log_showConsumeTotal(Time& time, ofstream& log);
+		void log_showConsumeTotal(Time& time, ofstream& log, ListaDevice& lista){
+
+		}
+
+	private:
+		string format_time(int time_min){ //funzione helper per formattare il tempo (da minuti dalle 00:00)
+			string time_formatted, mm, hh;
+			int mins = time_min%60;
+			int hours = time_min/60;
+			if(mins < 10) {mm = "0" + to_string(mins);}
+			else {mm = to_string(mins);}
+			if(hours < 10) {hh = "0" + to_string(hours);}
+			else {hh = to_string(hours);}
+			time_formatted = hh + ":" + mm;
+			return time_formatted;
+		}
 		
-}
+};
 
 #endif
