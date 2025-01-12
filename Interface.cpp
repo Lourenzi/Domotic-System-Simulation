@@ -8,9 +8,13 @@
 #include "DataStructure.h"
 #include "Interface.h"
 #include "ListaDevice.h"
+#include "EventLogger.h"
 using namespace std;
 
-ListaDevice listaDevice;
+EventLogger eventLog;
+ListaDevice deviceList;
+DataStructure dataStructure;
+Time timeCurrent = dataStructure.get_Time();
 
 Interface::Interface(){};
 
@@ -23,12 +27,16 @@ int Interface::calculateTime(string time_format){
 }
 
 void Interface::setTime(string time_format){ 
-	cout<<time_format<<endl;
-
+	int time_min = calculateTime(time_format);
+	timeCurrent.set_time(time_min);
 }
 
 void Interface::setStatus(string device_name, string status){ 
-	cout<<"setStatus " + status + " - " + device_name<<endl;
+	bool on = (status == "on") ? true : false; 
+	vector<Device> devices = deviceList.get_vector();
+	Device d = deviceList.get_Device_by_name(device_name);
+	cout<<d.get_device_name()<<endl;
+	dataStructure.set(d, on);
 }
 
 void Interface::setStatus(string device_name, string time_start, string time_stop){
@@ -61,6 +69,7 @@ void Interface::resetAll(){
 	cout<<"Reset all"<<endl;
 }
 
+
 bool Interface::isStatusValid(string status){
 	bool statusValid = false;
 	if(status == "on" || status == "off")
@@ -87,7 +96,7 @@ bool Interface::isTimeFormatValid(string time_format){
 
 bool Interface::isDeviceNameValid(string device_name){
 	bool deviceValid = false;
-	vector<Device> devices = listaDevice.get_vector();
+	vector<Device> devices = deviceList.get_vector();
 	for(int i=0; i<devices.size(); i++){
 		if(devices.at(i).get_device_name() == device_name){
 			deviceValid = true;
@@ -118,7 +127,9 @@ void Interface::parseCommand(string cmd, ofstream& log){ //funzione di estrapola
 			if(parameters.at(1) == "time"){  //se è un comando set time
 				if(parameters.size() == 3){
 					if(isTimeFormatValid(parameters.at(2))){
-						setTime(parameters.at(2));	
+						eventLog.log_updateTime(timeCurrent,log);
+						setTime(parameters.at(2));
+						eventLog.log_updateTime(timeCurrent,log);	
 					
 					}else{ cout<<"--Formato dell'orario errato--"<<endl; }
 				}
@@ -129,13 +140,20 @@ void Interface::parseCommand(string cmd, ofstream& log){ //funzione di estrapola
 					if(isDeviceNameValid(parameters.at(1))){	
 						if(parameters.size() == 4){
 							if(isTimeFormatValid(parameters.at(2)) && isTimeFormatValid(parameters.at(3))){
+								eventLog.log_updateTime(timeCurrent,log);
 								setStatus(parameters.at(1), parameters.at(2), parameters.at(3));
+								eventLog.log_updateTime(timeCurrent,log);
 							}
 							else{ cout<<"--Formato dell'orario errato--"<<endl; } 
 						}
 						else{
 							if(isStatusValid(parameters.at(2))) {
+								eventLog.log_updateTime(timeCurrent,log);
 								setStatus(parameters.at(1), parameters.at(2));
+								Device d = deviceList.get_Device_by_name(parameters.at(1));
+								cout<<d.get_device_name()<<endl;
+								eventLog.log_updateStatus(timeCurrent,log,d.get_device_name(),parameters.at(2));
+								eventLog.log_updateTime(timeCurrent,log);
 							}
 							else{ cout<<"--Status non settabile--"<<endl; }
 						}
@@ -150,12 +168,16 @@ void Interface::parseCommand(string cmd, ofstream& log){ //funzione di estrapola
 			if(parameters.size() <= 2){
 				if(parameters.size() == 2){  //se è un comando show ${DEVICENAME}
 					if(isDeviceNameValid(parameters.at(1))){
+						eventLog.log_updateTime(timeCurrent,log);
 						showConsumption(parameters.at(1));
+						eventLog.log_updateTime(timeCurrent,log);
 					}
 					else{cout<<"--Nome dispositivo non riconosciuto--"<<endl;}
 				}
 				else{  //comando show complessivo
+					eventLog.log_updateTime(timeCurrent,log);
 					showConsumption();
+					eventLog.log_updateTime(timeCurrent,log);
 				}	
 			}
 			else { cout<<"--Eccessivi o insufficienti parametri immessi--"<<endl; }	
@@ -164,7 +186,9 @@ void Interface::parseCommand(string cmd, ofstream& log){ //funzione di estrapola
 		if(cmd_type == "rm"){
 			if(parameters.size() == 2){
 				if(isDeviceNameValid(parameters.at(1))){
+					eventLog.log_updateTime(timeCurrent,log);
 					removeDevice(parameters.at(1));	
+					eventLog.log_updateTime(timeCurrent,log);
 				}
 				else{cout<<"--Nome dispositivo non riconosciuto--"<<endl;}
 			}
