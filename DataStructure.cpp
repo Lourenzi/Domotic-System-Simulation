@@ -23,9 +23,20 @@ vector<Device> listone = lista.get_vector();
 
 DataStructure::DataStructure() {}; /*creo la linea temporale*/  /*vector degli elementi e gia vuoto*/
 
-Time get_Time()
+Time DataStructure::get_Time()
 {
     return tempo;
+}
+
+void DataStructure::set_Time(int newTime)
+{
+    cout<<endl;
+    cout << "****************************** SALTO TEMPORALE A " << newTime << " ************************************" << endl;
+    cout<<endl;
+    
+    tempo.set_time(newTime);
+    accender();
+    get_device_in_order();
 }
 
 void DataStructure::sort(EntryStructure entry) /*riordinare il vettore in base al tempo che caratterizza ogni evento*/
@@ -40,13 +51,13 @@ void DataStructure::sort(EntryStructure entry) /*riordinare il vettore in base a
         int counter = 0;
         for (int i =0; i<eventi.size(); i++)
         {
-            if (eventi[i].get_keyTime() >= timeEntry) /*prende il primo piu grande perche poi brekka*/
+            if (timeEntry < eventi[i].get_keyTime()) /*prende il primo piu grande perche poi brekka*/
             {
                 counter = i;
                 break;
             }
             
-            if (timeEntry > eventi[i].get_keyTime() && i == eventi.size()-1)
+            if (timeEntry >= eventi[i].get_keyTime() && i == eventi.size()-1)
             {
                 cout << "per riordinare " << entry.get_element() << " sono entrato qui " << endl;
                 counter = (int)eventi.size();
@@ -70,30 +81,44 @@ vector<EntryAccesi> DataStructure::get_device_in_order()
             limite++;
         }
     }
-    cout<<"-----------------------"<<limite<<endl;
+    //cout<<"-----------------------"<<limite<<endl;
 
     for (int i =0; i< limite; i++)
     {
         if (eventi[i].get_status() == true)
         {
-            cout<<"sono entrato qui quessta volta";
+            //cout<<"evento che sto aggiungendo alla lista e collegato all elemento " << eventi[i].get_element() <<endl;
             EntryAccesi info (eventi[i].get_element(), eventi[i].get_power());
             accensioni.insert(accensioni.begin(), info);
         }
         else
         {
-            for (int f=0; f<accensioni.size(); f++)
+            if (accensioni.size() == 1)
             {
-                if (accensioni[f].get_Name() == eventi[i].get_element())
+                accensioni.pop_back();
+            }
+            else
+            {
+                for (int f=0; f<accensioni.size(); f++)
                 {
-                    for (int j = f; j<accensioni.size()-1; j++)
+                    if (accensioni[f].get_Name() == eventi[i].get_element())
                     {
-                        accensioni[j]  = accensioni[j+1];
+                        for (int j = f; j<accensioni.size()-1; j++)
+                        {
+                            accensioni[j]  = accensioni[j+1];
+                        }
                     }
                 }
+                accensioni.pop_back();
             }
         }
     }
+    
+    for (int i =0; i< accensioni.size(); i++)
+    {
+        cout<<"dispositivo acceso in questo momento " << accensioni[i].get_Name() << endl;
+    }
+    
     return accensioni;
 }
 
@@ -108,7 +133,6 @@ void DataStructure::elimina (int f)
 
 void DataStructure::set(Device device, bool on)  /*viene settato un dispositivo on o off*/   /*ho bisogno di time perche non so quando siamo*/
 {
-    accender();
     if (on) /*caso in cui lo debba accendere*/
     {
         if (device.is_device_on()) throw invalid_argument("oggetto gia acceso");   /*se e gia acceso non posso accenderlo*/
@@ -120,14 +144,14 @@ void DataStructure::set(Device device, bool on)  /*viene settato un dispositivo 
             device.modify_device_start(tempo.get_currentTime());
             device.modify_device_status(true); /*current time = momento in cui si accende il dispositivo*/
             
-            /*debug*/ cout<< "orario collegato con láccensione del dispositivo: " << entryInizio.get_keyTime() << endl;
-            
             if (device.is_device_automatic())
             {
 /*CONTROLLO*/   /*devo controllare che in questo intervallo io non abbia programmao láccnesione del dispositivo in precedenza*/
                 for (int i=0; i<eventi.size(); i++)
                 {
-                    if (eventi[i].get_keyTime()>tempo.get_currentTime() && eventi[i].get_keyTime()<(tempo.get_currentTime()+device.get_device_timer())) /*trovo un accensione del dispositivo*/
+                    if (eventi[i].get_element() == device.get_device_name() &&
+                        eventi[i].get_keyTime()>tempo.get_currentTime() &&
+                        eventi[i].get_keyTime()<(tempo.get_currentTime()+device.get_device_timer())) /*trovo un accensione del dispositivo*/
                         /*devo eliminare questa programmazione sia accensione che spegnimento*/
                     {
                         elimina (i);
@@ -215,7 +239,6 @@ void DataStructure::set(Device device, bool on)  /*viene settato un dispositivo 
 
 void DataStructure::set (Device device, int moment) /*accesione programmata*/
 {
-    accender();
     if (moment < tempo.get_currentTime()) throw invalid_argument("non si puo aplicare una pianificazion al passato");
     
     if (device.is_device_automatic())
@@ -315,7 +338,6 @@ void DataStructure::set (Device device, int moment) /*accesione programmata*/
             if (eventi[i].get_keyTime() <= moment) posizione ++;
         }
         //controllo che non ci siano entry con lo stesso nome che si chiudono o si aprono e chiiudono all interno dellíntervallo
-        bool trovato = false;
         for (int i = posizione; i < eventi.size(); i ++)
         {
             if (eventi[i].get_element() == device.get_device_name() && eventi[i].get_status() == true) //e pianificata un accensione
@@ -335,14 +357,16 @@ void DataStructure::set (Device device, int moment) /*accesione programmata*/
 
 void DataStructure::set (Device device, int start_device, int stop_device) /*setto accensione e spegnimento*/
 {
-    accender();
     /*modifico informazioni di accensione e spegnimento del dispositivo*/
     
     if (device.is_device_automatic()) throw invalid_argument("ha un tempo prefissato");
     if (stop_device <= start_device) throw invalid_argument("non e possibile spegnere il dispositivo prima che si accendi");
+    if (start_device < tempo.get_currentTime()) throw invalid_argument("programmazione nel passato non ha senso");
 
-    EntryStructure entryInizio (start_device, device.get_device_name(), true, device.get_device_consume()); /*creo la entry che mi rapprsenta láccensione*/
-    EntryStructure entryFine (stop_device, device.get_device_name(), false, device.get_device_consume()); /*creo la entry che mi rappresenta lo spegnimento*/
+    EntryStructure entryInizio (start_device, device.get_device_name(), true, device.get_device_consume());
+    /*creo la entry che mi rapprsenta láccensione*/
+    EntryStructure entryFine (stop_device, device.get_device_name(), false, device.get_device_consume());
+    /*creo la entry che mi rappresenta lo spegnimento*/
 
     if (eventi.empty())
     {
@@ -351,63 +375,73 @@ void DataStructure::set (Device device, int start_device, int stop_device) /*set
     }
     else
     {
-        int position_start = 0;
-        int position_end = 0; /*cosi so da dove ho preso le informazioni*/
+        /*inserisco le entry nel vettore*/
+        sort(entryInizio);
+        sort(entryFine);
         
-        for (int i =0; i<eventi.size(); i++) /*trovo la posizione dove si trova la entry*/
+        /*mi salvo dove si trovano nella lista*/
+        int position_start = 0;
+        int position_end = 0;
+        
+        for (int i =0; i<eventi.size(); i++)
         {
-            if (eventi[i].get_keyTime() <= start_device)
+            if (eventi[i].get_element() == device.get_device_name() && eventi[i].get_keyTime() == start_device)
             {
                 position_start = i;
             }
-            if (eventi[i].get_keyTime() <= stop_device)
+            
+            if (eventi[i].get_element() == device.get_device_name() && eventi[i].get_keyTime() == stop_device)
             {
                 position_end = i;
             }
         }
-        cout<<"fino a qui tutto apposto"<<endl;
+        
+/*debug*/cout<<"fino a qui tutto apposto"<<endl;
+        
         /*controlllo se in mezzo a queste entry ci sono delle programmazioni dello stesso oggetto*/
-        for (int i = position_start; i <= position_end; i++)
+        
+        if (position_start+1 != position_end) /*ci sono programmazioni in mezzo*/
         {
-            if (eventi[i].get_element() == device.get_device_name()) /*ce una programmazione per questo dispositivo*/
+            for (int i = position_start+1; i < position_end; i++)
             {
-                if (eventi[i].get_status()) /*progrmmazione di accensione*/
+                /*ce una programmazione per questo dispositivo?*/
+                if (eventi[i].get_element() == device.get_device_name()) /*SI*/
                 {
-                    cout<<"------------------HO USATO IL PRIMO-------------------"<<endl;
-                    for (int f = i; f< eventi.size(); f++)
+                    if (eventi[i].get_status()) /*progrmmazione di accensione*/
                     {
-                        if (eventi[f].get_element() == device.get_device_name() && eventi[f].get_status() == false)
+                        for (int f = i; f< eventi.size(); f++)
                         {
-                            elimina(i);
-                            elimina(f);
-                            sort(entryInizio);
-                            sort(entryFine);
-                        }
-                    }
-                }
-                else /*accensione prima della mia */
-                {
-                    cout<<"------------------HO USATO IL SECONDO-------------------"<<endl;
-                    /*controllo che start non sia >= a current time*/
-                    for (int f = position_start; f>0; f--)
-                    {
-                        cout<<"cado in questo caso"<<endl;
-                        if (eventi[f].get_element() == device.get_device_name() && eventi[f].get_status() == true)
-                        {
-                            if (eventi[f].get_keyTime() > tempo.get_currentTime())
+                            if (eventi[f].get_element() == device.get_device_name() && eventi[f].get_status() == false)
                             {
-                                /*posso ancora togliere questa programmazione*/
                                 elimina(i);
                                 elimina(f);
-                                sort(entryInizio);
-                                sort(entryFine);
                             }
-                            else
+                        }
+                    }
+                    else /*accensione prima della mia */
+                    {
+                        /*controllo che start non sia >= a current time*/
+                        int x =0;
+                        for (int f = 0; f<position_start; f++)
+                        {
+                            cout<<"cado in questo caso"<<endl;
+                            if (eventi[f].get_element() == device.get_device_name() && eventi[f].get_status() == true)
                             {
-                                /*programmazione e gia in corso, non posso aggiungere le programmazione corrente*/
-                                cout<<"programmazione di "<<device.get_device_name()<<" non puo essere aggiunta perche in contrasto con quella delle: ";
-                                cout<<eventi[f].get_keyTime()<< " impostata fino alle "<<eventi[i].get_keyTime()<<endl;
+                                x = f;
                             }
+                        }
+                        
+                        if (eventi[x].get_keyTime() > tempo.get_currentTime())
+                        {
+                            /*posso ancora togliere questa programmazione*/
+                            elimina(i);
+                            elimina(x);
+                        }
+                        else
+                        {
+                            /*programmazione e gia in corso, non posso aggiungere le programmazione corrente*/
+                            cout<<"programmazione di "<<device.get_device_name()<<" non puo essere aggiunta perche in contrasto con quella delle: ";
+                            cout<<eventi[x].get_keyTime()<< " impostata fino alle "<<eventi[i].get_keyTime()<<endl;
                         }
                     }
                 }
@@ -418,7 +452,6 @@ void DataStructure::set (Device device, int start_device, int stop_device) /*set
 
 void DataStructure::rm (Device device) /*devo mettere now seno potrei togliere uno spegnimento passato e non ha senso*/
 {
-    accender();
     device.modify_device_end((60*24)+1);
     
     for (int i = tempo.get_currentTime(); i< eventi.size(); i++)    /*cerco in cio che accadra da now in poi*/
@@ -441,10 +474,18 @@ void DataStructure::rm (Device device) /*devo mettere now seno potrei togliere u
 
 void DataStructure::accender()
 {
+    //cout<<"sono dentro ACCENDER " << endl;
     for (int i = 0; i< eventi.size(); i++)
     {
+        //if (eventi[i].get_keyTime() <= tempo.get_currentTime()) cout<<"prima vera"<<endl;
+        //if (eventi[i].get_status() == true) cout<<"seconda vera"<<endl;
+        
+        //cout<< "tempo corrente: " << tempo.get_currentTime() << endl;
+        //cout<< "momento in cui avviene lévento i" << tempo.get_currentTime() << endl;
+        
         if (eventi[i].get_keyTime() <= tempo.get_currentTime() && eventi[i].get_status() == true)
         {
+            //cout<<"-----ce qualcosa di acceso ed e " << eventi[i].get_element() <<endl;
             for (int f =0; f<listone.size(); f++)
             {
                 if (eventi[i].get_element() == listone[f].get_device_name() && listone[f].is_device_on() == false)
@@ -468,6 +509,7 @@ void DataStructure::accender()
 
 void DataStructure::stampa()
 {
+    cout<<"-------------------------------------tempo in cui mi trovo " << tempo.get_currentTime() << endl;
     cout<<"sono dentro stampa, eventi.size(): "<< eventi.size() << endl;
     for (int i =0; i<eventi.size(); i++)
     {
@@ -484,5 +526,3 @@ void DataStructure::stampa()
         cout<< " " << eventi[i].get_element() << acceso << endl;
     }
 }
-
-
