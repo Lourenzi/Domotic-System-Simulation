@@ -4,7 +4,6 @@
 //
 //  Created by Eduardo on 31/12/24.
 //
-
 #ifndef ENTRYSTRUCTURE_H
 #define ENTRYSTRUCTURE_H
 
@@ -16,13 +15,13 @@ using namespace std;
 class EntryStructure
 {
 private:
-    
-    int keyTime;
-    string element;
-    bool on;
-    int power;
-    int id_element;
-    bool always_on;
+
+    int keyTime;                                            /*chiave della entry evento*/
+    string element;                                         /*nome del device soggetto dellévento*/
+    bool on;                                                /*tipo di entry (true = accensione, false = spegnimento)*/
+    double power;                                           /*energia usata/prodotta dal dispositivo*/
+    int id_element;                                         /*id identificativo dellévento*/
+    bool always_on;                                         /*tipo di dispositivo (true = always on, false = normale)*/
     
 public:
     
@@ -36,7 +35,7 @@ public:
         always_on = AO;
     };
     
-    /*creo una tripletta momento evento-id elemtno-nuovo stato elemtno*/
+    /*FUNZIONI GET*/
     int entry_get_keyTime()
     {
         return keyTime;
@@ -73,6 +72,7 @@ public:
     }
     
     
+    /*funzione per copiare le entry*/
     EntryStructure copy (EntryStructure vecchio)
     {
         EntryStructure nuovo (vecchio.entry_get_keyTime(), vecchio.entry_get_element(), vecchio.entry_get_status(), vecchio.entry_get_power(), vecchio.entry_get_id_element(), vecchio.entry_is_always_on());
@@ -80,14 +80,15 @@ public:
     };
 };
 
+/*classe usata per il vettore dei dispositivi accesi in questo momento*/
 class EntryAccesi
 {
 private:
     
-    string name;
-    int id_element;
-    int power;
-    
+    string name;                                            /*nome del dispositivo a cui e'collegato lévento*/
+    int id_element;                                         /*id del dispositivo a cui eçollegato lévento*/
+    int power;                                              /*potenza del dispositivo a cui eçollegato lévento*/
+        
 public:
     
     EntryAccesi(string nome_dispositivo, int potenza, int ID)
@@ -98,6 +99,7 @@ public:
     };
     
     
+    /*FUNZIONI GET*/
     string entryON_get_Name()
     {
         return name;
