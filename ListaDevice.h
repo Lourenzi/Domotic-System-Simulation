@@ -4,11 +4,6 @@
 //
 //  Created by Eduardo on 02/01/25.
 //
-
-
-//CREARE FUNZIONI CHE MODIFICANO DIRETTMENTE QUESTO OGGETTO
-
-
 #ifndef LISTADEVICE_H
 #define LISTADEVICE_H
 
@@ -22,14 +17,15 @@ class ListaDevice
 {
 private:
     
-    vector<Device> lista_Device;
-    vector<string> name;
+    vector<Device> lista_Device;                                /*vettore degli oggetti device*/
+    vector<string> name;                                        /*vettore associato con i nomi dei device*/
     
 public:
     
     ListaDevice()
     {
         
+        /*ELENCO DI DISPOSITIVI*/
         Device impianto_fotovoltaico ("impianto_fotovoltaico", 1.5/*KW*/, 1, true);
         lista_Device.push_back(impianto_fotovoltaico);
         name.push_back("impianto_fotovoltaico");
@@ -81,12 +77,14 @@ public:
     }
     
     
+    /*FUNZIONE DI MODIFICA DELLO STATO DELLÓGGETTO*/
     void modify_device_status (int indice, bool status)
     {
         lista_Device[indice].modify_device_status(status);
     };
     
     
+    /*FUNZIONI GET*/
     vector<Device> get_vector()
     {
         return lista_Device;
@@ -99,6 +97,8 @@ public:
     };
     
     
+    /*FUNZIONI PER OTTENERE IL DISPOSITIVO*/
+    /*tramite ID*/
     Device get_device_by_ID(int ID)
     {
         int i =0;
@@ -115,7 +115,7 @@ public:
         return d;
     }
     
-    
+    /*tramite NOME*/
     Device get_Device_by_name(string device_name)
     {
         int i=0;
@@ -132,12 +132,13 @@ public:
         return d;
     }
     
-    
+    /*taglia del vettore*/
     int size()
     {
         return (int)lista_Device.size();
     }
     
+    /*overload []*/
     Device& operator[](int i)
     {
         if (i >= lista_Device.size())
