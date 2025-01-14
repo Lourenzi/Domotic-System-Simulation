@@ -29,20 +29,21 @@ int Interface::calculateTime(string time_format){
 void Interface::setTime(string time_format){ 
 	int time_min = calculateTime(time_format);
 	timeCurrent.set_time(time_min);
+	dataStructure.set_Time(time_min);
 }
 
 void Interface::setStatus(string device_name, string status){ 
 	bool on = (status == "on") ? true : false; 
-	vector<Device> devices = deviceList.get_vector();
 	Device d = deviceList.get_Device_by_name(device_name);
-	cout<<d.get_device_name()<<endl;
 	dataStructure.set(d, on);
 }
 
 void Interface::setStatus(string device_name, string time_start, string time_stop){
-	
-
-	cout<<"setStatus ON - "<<device_name<<" "<<time_start<<" "<<time_stop<<endl;
+	int start = calculateTime(time_start);
+	int stop = calculateTime(time_stop);
+	Device d = deviceList.get_Device_by_name(device_name);
+	cout<<d.get_device_name()<<endl;
+	dataStructure.set(d, start, stop);
 }
 
 void Interface::showConsumption(){ 
@@ -107,7 +108,7 @@ bool Interface::isDeviceNameValid(string device_name){
 
 
 
-void Interface::parseCommand(string cmd, ofstream& log){ //funzione di estrapolazione dei parametri del comando da terminale
+void Interface::parseCommand(string cmd){ //funzione di estrapolazione dei parametri del comando da terminale
 	vector<string> parameters; //vector indicizzato cosi' : [tipo di comando] --> 0 , [nome device/time var] --> 1 , [status/ora start timer/ora set] --> 2 , [ora stop timer] --> 3
 	int i_start = 0; // indice di inizio parola i-esima della stringa comando
 	int i = 0;
@@ -127,9 +128,9 @@ void Interface::parseCommand(string cmd, ofstream& log){ //funzione di estrapola
 			if(parameters.at(1) == "time"){  //se è un comando set time
 				if(parameters.size() == 3){
 					if(isTimeFormatValid(parameters.at(2))){
-						eventLog.log_updateTime(timeCurrent,log);
+						eventLog.log_updateTime(timeCurrent);
 						setTime(parameters.at(2));
-						eventLog.log_updateTime(timeCurrent,log);	
+						eventLog.log_updateTime(timeCurrent);	
 					
 					}else{ cout<<"--Formato dell'orario errato--"<<endl; }
 				}
@@ -140,20 +141,24 @@ void Interface::parseCommand(string cmd, ofstream& log){ //funzione di estrapola
 					if(isDeviceNameValid(parameters.at(1))){	
 						if(parameters.size() == 4){
 							if(isTimeFormatValid(parameters.at(2)) && isTimeFormatValid(parameters.at(3))){
-								eventLog.log_updateTime(timeCurrent,log);
+								Device d = deviceList.get_Device_by_name(parameters.at(1));
+								int start = calculateTime(parameters.at(2));
+								int end = calculateTime(parameters.at(3));
+								cout<<d.get_device_name()<<start<<end<<endl;
+								eventLog.log_updateTime(timeCurrent);
 								setStatus(parameters.at(1), parameters.at(2), parameters.at(3));
-								eventLog.log_updateTime(timeCurrent,log);
+								eventLog.log_updateTimer(timeCurrent,d.get_device_name(),calculateTime(parameters.at(2)),calculateTime(parameters.at(3)));
+								eventLog.log_updateTime(timeCurrent);
 							}
 							else{ cout<<"--Formato dell'orario errato--"<<endl; } 
 						}
 						else{
 							if(isStatusValid(parameters.at(2))) {
-								eventLog.log_updateTime(timeCurrent,log);
-								setStatus(parameters.at(1), parameters.at(2));
 								Device d = deviceList.get_Device_by_name(parameters.at(1));
-								cout<<d.get_device_name()<<endl;
-								eventLog.log_updateStatus(timeCurrent,log,d.get_device_name(),parameters.at(2));
-								eventLog.log_updateTime(timeCurrent,log);
+								eventLog.log_updateTime(timeCurrent);
+								setStatus(parameters.at(1), parameters.at(2));
+								eventLog.log_updateStatus(timeCurrent,d.get_device_name(),parameters.at(2));
+								eventLog.log_updateTime(timeCurrent);
 							}
 							else{ cout<<"--Status non settabile--"<<endl; }
 						}
@@ -168,16 +173,16 @@ void Interface::parseCommand(string cmd, ofstream& log){ //funzione di estrapola
 			if(parameters.size() <= 2){
 				if(parameters.size() == 2){  //se è un comando show ${DEVICENAME}
 					if(isDeviceNameValid(parameters.at(1))){
-						eventLog.log_updateTime(timeCurrent,log);
+						eventLog.log_updateTime(timeCurrent);
 						showConsumption(parameters.at(1));
-						eventLog.log_updateTime(timeCurrent,log);
+						eventLog.log_updateTime(timeCurrent);
 					}
 					else{cout<<"--Nome dispositivo non riconosciuto--"<<endl;}
 				}
 				else{  //comando show complessivo
-					eventLog.log_updateTime(timeCurrent,log);
+					eventLog.log_updateTime(timeCurrent);
 					showConsumption();
-					eventLog.log_updateTime(timeCurrent,log);
+					eventLog.log_updateTime(timeCurrent);
 				}	
 			}
 			else { cout<<"--Eccessivi o insufficienti parametri immessi--"<<endl; }	
@@ -186,9 +191,9 @@ void Interface::parseCommand(string cmd, ofstream& log){ //funzione di estrapola
 		if(cmd_type == "rm"){
 			if(parameters.size() == 2){
 				if(isDeviceNameValid(parameters.at(1))){
-					eventLog.log_updateTime(timeCurrent,log);
+					eventLog.log_updateTime(timeCurrent);
 					removeDevice(parameters.at(1));	
-					eventLog.log_updateTime(timeCurrent,log);
+					eventLog.log_updateTime(timeCurrent);
 				}
 				else{cout<<"--Nome dispositivo non riconosciuto--"<<endl;}
 			}
@@ -206,6 +211,5 @@ void Interface::parseCommand(string cmd, ofstream& log){ //funzione di estrapola
 	}
 	else{
 		cout<<"--Tipo di comando inesistente--"<<endl;
-		//throw invalid_argument("--- Tipo di comando inesistente ---");
 	}
 }
