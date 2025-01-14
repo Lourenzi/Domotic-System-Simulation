@@ -11,6 +11,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <fstream>
 
 #include "Device.h"
 #include "EntryStructure.h"
@@ -22,18 +23,25 @@ class DataStructure
 private:
     
     vector<EntryStructure> eventi;
-    //vector<string> accensioni;    /*salvo in ordine le accensioni che sono avvenute*/
+    ofstream fileLog;
     
 public:
     
     DataStructure(); /*viene creato allínizio quando non ci sono eventi ancora eseguiti*/
     
-    void set (Device device, bool status);
-    void set (Device device, int start_device, int stop_device);
-    void set (Device device, int start_device);
-    void rm (Device device);
+    void set (Device &device, bool status);
+    void set (Device &device, int start_device, int stop_device);
+    void set (Device &device, int start_device);
+    void rm (Device &device);
     
     vector<EntryAccesi> get_device_in_order ();
+    double getCurrentPower(void);
+    void checkPower(void);
+    
+    void set_logFile(ofstream& log)
+    {
+        fileLog = log;
+    };
     
     void stampa ();
     
