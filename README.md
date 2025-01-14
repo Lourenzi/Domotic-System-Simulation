@@ -1,5 +1,11 @@
 ## **Domotic-System-Simulation** 
  
+### Come eseguire il programma?
+
+Incollare nel terminale: g++ -o main main.cpp Interface.cpp DataStructure.cpp
+
+
+---
 
 ### Cosa fa?
 
@@ -21,7 +27,15 @@ Le classi non sono tutte allo stesso livello, la loro gerarchia e' molto importa
 
 Il grafico qui sotto mostra l'organizzazione delle classi
 
-*spazio per il grafico*
+Main  
+├── Interface  
+└── DataStructure  
+    ├── EventLogger  
+    │   ├── Time  
+    │   └── ListaDevice ── Device      
+    │      
+    └── EntryStructure
+
 
 
 
