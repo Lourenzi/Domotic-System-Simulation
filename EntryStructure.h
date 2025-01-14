@@ -21,41 +21,61 @@ private:
     string element;
     bool on;
     int power;
+    int id_element;
+    bool always_on;
     
 public:
     
-    EntryStructure(int time, string name, bool onStatus, int potenza)
+    EntryStructure(int time, string name, bool onStatus, int potenza, int ID, bool AO)
     {
         keyTime = time;
         element = name;
         on = onStatus;
         power = potenza;
+        id_element = ID;
+        always_on = AO;
     };
     
     /*creo una tripletta momento evento-id elemtno-nuovo stato elemtno*/
-    int get_keyTime()
+    int entry_get_keyTime()
     {
         return keyTime;
     };
     
-    string get_element()
+    
+    string entry_get_element()
     {
         return element;
     };
     
-    bool get_status()
+    
+    bool entry_get_status()
     {
         return on;
     };
     
-    int get_power()
+    
+    int entry_get_power()
     {
         return power;
     };
     
+    
+    int entry_get_id_element()
+    {
+        return id_element;
+    };
+    
+    
+    bool entry_is_always_on()
+    {
+        return always_on;
+    }
+    
+    
     EntryStructure copy (EntryStructure vecchio)
     {
-        EntryStructure nuovo (vecchio.get_keyTime(), vecchio.get_element(), vecchio.get_status(), vecchio.get_power());
+        EntryStructure nuovo (vecchio.entry_get_keyTime(), vecchio.entry_get_element(), vecchio.entry_get_status(), vecchio.entry_get_power(), vecchio.entry_get_id_element(), vecchio.entry_is_always_on());
         return nuovo;
     };
 };
@@ -65,24 +85,34 @@ class EntryAccesi
 private:
     
     string name;
+    int id_element;
     int power;
     
 public:
     
-    EntryAccesi(string nome_dispositivo, int potenza)
+    EntryAccesi(string nome_dispositivo, int potenza, int ID)
     {
         name = nome_dispositivo;
         power = potenza;
+        id_element = ID;
     };
     
-    string get_Name()
+    
+    string entryON_get_Name()
     {
         return name;
     };
     
-    int get_Power()
+    
+    int entryON_get_Power()
     {
         return power;
+    };
+    
+    
+    int entryON_get_id_element()
+    {
+        return id_element;
     };
 };
 
