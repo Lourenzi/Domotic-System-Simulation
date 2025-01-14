@@ -25,7 +25,7 @@ EventLogger logger;
 
 DataStructure::DataStructure()                      /*costruttore oggeto DataStructure*/
 {
-    /*non ho bisogno di inizializzare nulla perche le variabili di stato vengono inizzializzate come voglio di default (vettore vuoto)*/
+    logger.log_updateStatus(tempo, "debug", false);/*non ho bisogno di inizializzare nulla perche le variabili di stato vengono inizzializzate come voglio di default (vettore vuoto)*/
 }
 
 Time DataStructure::get_Time()                      /*permette accesso alla variabile time del oggetto tempo*/
@@ -38,8 +38,17 @@ void DataStructure::set_Time(int newTime)           /*permette di modificare la 
     /*DEBUG*/   cout<<endl;
     /*DEBUG*/   cout << "****************************** SALTO TEMPORALE A " << newTime << " ************************************" << endl;
     /*DEBUG*/   cout<<endl;
-    logger.log_updateStatus(tempo,"debug",false);
     tempo.set_time(newTime);                        /*modifico current time dellóggetto*/
+    
+    for (int i =0; i< lista.size(); i++)            /*modifico parametri dei device AlwaysOn*/
+    {
+        if (lista[i].is_device_alwaysOn())
+        {
+            lista[i].modify_device_end(tempo.get_currentTime());
+            lista[i].modify_device_timeOn(lista[i].get_device_end() - lista[i].get_device_start());
+        }
+    }
+
     accender();                                     /*accende i dispositivi programmati durante il salto teporale*/
     get_device_in_order();                          /*riordina i dispositivi in un vettore dallúltimo acceso al primo
                                                      (pop_back toglie dalla lista quello piu vecchio)*/
@@ -127,7 +136,7 @@ vector<EntryAccesi> DataStructure::get_device_in_order()    /*restituisce un vet
             accensioni.insert(accensioni.begin(), info);
         }
     }
-    
+
     return accensioni;
 }
 
@@ -606,8 +615,16 @@ void DataStructure::rm (Device &device) /*devo mettere now seno potrei togliere 
 
 void DataStructure::accender()
 {
-    //cout<<"sono dentro ACCENDER " << endl;
-    for (int i = 0; i< eventi.size(); i++)
+    int fine_analisi_precedente = 0;
+    for (int i =0; i< eventi.size(); i++)
+    {
+        if (eventi[i].entry_get_keyTime() > tempo.get_lastTime())
+        {
+            fine_analisi_precedente = i;
+        }
+    }
+
+    for (int i = fine_analisi_precedente; i< eventi.size(); i++)
     {
         //if (eventi[i].get_keyTime() <= tempo.get_currentTime()) cout<<"prima vera"<<endl;
         //if (eventi[i].get_status() == true) cout<<"seconda vera"<<endl;
