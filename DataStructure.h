@@ -4,7 +4,6 @@
 //
 //  Created by Eduardo on 31/12/24.
 //
-
 #ifndef DATASTRUCTURE_H
 #define DATASTRUCTURE_H
 
@@ -22,35 +21,27 @@ class DataStructure
 {
 private:
     
-    vector<EntryStructure> eventi;
-    ofstream fileLog;
+    vector<EntryStructure> eventi;                                      /*vettore in cui salvo le entry eventi*/
     
 public:
     
-    DataStructure(); /*viene creato allínizio quando non ci sono eventi ancora eseguiti*/
+    DataStructure();
     
-    void set (Device &device, bool status);
-    void set (Device &device, int start_device, int stop_device);
-    void set (Device &device, int start_device);
-    void rm (Device &device);
+    void set (Device &device, bool status);                             /*set riguardante tempo attuale*/
+    void set (Device &device, int start_device, int stop_device);       /*set con accensione e spegnimento programmati*/
+    void set (Device &device, int start_device);                        /*set con accensione programmata*/
+    void rm (Device &device);                                           /*remove programmazione device*/
     
-    vector<EntryAccesi> get_device_in_order ();
-    double getCurrentPower(void);
-    void checkPower(void);
+    vector<EntryAccesi> get_device_in_order ();                         /*riordina gli eventi dal meno recente al piu recente*/
     
-    void set_logFile(ofstream& log)
-    {
-        fileLog = log;
-    };
+    double getCurrentPower(void);                                       /*dice quanta energia stiamo usando*/
+    void checkPower(void);                                              /*spegne i dispositivi se siamo sopra di energia*/
+    void accender();                                                    /*accende e spegne i dispositivi*/
     
-    void stampa ();
-    
-    void accender();
-    
-    void set_Time(int newTime);
-    Time get_Time();
-    void sort(EntryStructure entry);
-    void elimina(int i);
+    void set_Time(int newTime);                                         /*cambia la variabile tempo*/
+    Time get_Time();                                                    /*restituisce valore di tempo*/
+    void sort(EntryStructure entry);                                    /*riordina le entry eventi*/
+    void elimina(int i);                                                /*elimina un elemento da un vettore di entry*/
 };
 
 #endif
