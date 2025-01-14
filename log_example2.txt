@@ -1,0 +1,28 @@
+[00:00] L'orario attuale e' 00:00
+[00:00] Impostato un timer per il dispositivo 'impianto_fotovoltaico' dalle 08:00 alle 18:00
+[00:00] L'orario attuale e' 00:00
+[00:00] L'orario attuale e' 00:00
+[00:00] Il dispositivo 'lavatrice' ha attualmente consumato 0 kWh
+[00:00] L'orario attuale e' 00:00
+[00:00] L'orario attuale e' 00:00
+[08:00] Il dispositivo 'impianto_fotovoltaico' si e' acceso
+[09:00] L'orario attuale e' 09:00
+[09:00] L'orario attuale e' 09:00
+[09:00] Il dispositivo 'lavatrice' si e' acceso
+[09:00] L'orario attuale e' 09:00
+[09:00] L'orario attuale e' 09:00
+[10:50] Il dispositivo 'lavatrice' si e' spento
+[17:00] L'orario attuale e' 17:00
+[17:00] L'orario attuale e' 17:00
+[17:00]	Attualmente il sistema ha prodotto 13.5 kWh e consumato 3.67 kWh. Nello specifico:				
+		- Il dispositivo 'impianto_fotovoltaico' ha attualmente prodotto 13.5 kWh
+		- Il dispositivo 'lavatrice' ha attualmente consumato 3.67 kWh
+		- Il dispositivo 'lavastoviglie' ha attualmente consumato 0 kWh
+		- Il dispositivo 'termostato' ha attualmente consumato 0 kWh
+		- Il dispositivo 'tapparelle_elettriche' ha attualmente consumato 0 kWh
+		- Il dispositivo 'scaldabagno' ha attualmente consumato 0 kWh
+		- Il dispositivo 'frigorifero' ha attualmente consumato 0 kWh
+		- Il dispositivo 'forno_a_microonde' ha attualmente consumato 0 kWh
+		- Il dispositivo 'asciugatrice' ha attualmente consumato 0 kWh
+		- Il dispositivo 'televisore' ha attualmente consumato 0 kWh
+[17:00] L'orario attuale e' 17:00

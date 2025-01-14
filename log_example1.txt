@@ -1,0 +1,11 @@
+[00:00] L'orario attuale e' 00:00
+[00:00] Il dispositivo 'lavatrice' si e' acceso
+[00:00] L'orario attuale e' 00:00
+[00:00] L'orario attuale e' 00:00
+[00:00] Impostato un timer per il dispositivo 'frigorifero' dalle 10:00 alle 16:00
+[00:00] L'orario attuale e' 00:00
+[00:00] L'orario attuale e' 00:00
+[01:50] Il dispositivo 'lavatrice' si e' spento
+[10:00] Il dispositivo 'frigorifero' si e' acceso
+[16:00] Il dispositivo 'frigorifero' si e' spento
+[18:00] L'orario attuale e' 18:00
