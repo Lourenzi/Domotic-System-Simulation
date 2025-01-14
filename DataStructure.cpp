@@ -636,6 +636,7 @@ void DataStructure::accender()
                     lista[f].modify_device_start(eventi[i].entry_get_keyTime());
                     lista[f].modify_device_end(-1);
                     lista[f].modify_device_status(true);
+                    logger.log_updateStatus(tempo, lista[f].get_device_name(), true);
                 }
             }
         }
@@ -650,6 +651,7 @@ void DataStructure::accender()
                     lista[f].modify_device_status(false);
                     lista[f].modify_device_end(eventi[i].entry_get_keyTime());
                     lista[f].modify_device_timeOn(lista[f].get_device_end() - lista[f].get_device_start());
+                    logger.log_updateStatus(tempo, lista[f].get_device_name(), false);
                 }
             }
         }
