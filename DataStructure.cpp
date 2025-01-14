@@ -550,8 +550,21 @@ void DataStructure::stampa()
         int orario = eventi[i].get_keyTime();
         int ora = orario / 60;
         int minuti = orario % 60;
+
+        if(ora < 10)
+        {
+            cout <<"["<< "0" <<ora << ":";
+        }else{
+            cout <<"["<< ora << ":";
+        }
+
+        if(minuti < 10)
+        {
+            cout<< "0" << minuti << "]";
+        }else{
+            cout<< minuti << "]";
+        }
         
-        cout<<"["<< ora << ":" << minuti << "]";
         
         string acceso;
         if (eventi[i].get_status() == true) acceso = " si e acceso ";
