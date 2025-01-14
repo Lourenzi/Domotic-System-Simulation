@@ -12,7 +12,7 @@
 #include "DataStructure.h"
 #include "ListaDevice.h"
 #include "Device.h"
-#include "EventiLogger.h"
+#include "EventLogger.h"
 
 #include <stdexcept>
 
@@ -38,7 +38,7 @@ void DataStructure::set_Time(int newTime)           /*permette di modificare la 
     /*DEBUG*/   cout<<endl;
     /*DEBUG*/   cout << "****************************** SALTO TEMPORALE A " << newTime << " ************************************" << endl;
     /*DEBUG*/   cout<<endl;
-    
+    logger.log_updateStatus(tempo,"debug",false);
     tempo.set_time(newTime);                        /*modifico current time dellóggetto*/
     accender();                                     /*accende i dispositivi programmati durante il salto teporale*/
     get_device_in_order();                          /*riordina i dispositivi in un vettore dallúltimo acceso al primo
@@ -140,9 +140,9 @@ void DataStructure::elimina (int f) /*funzione per eliminare un elemento di un e
     eventi.pop_back();
 }
 
-void DataStructure::set(Device &device, bool on)  /*accendo o spegno un dispositivo in CURRENT TIME (adesso)*/
+void DataStructure::set(Device &device, bool on)  /*accendo o spengo un dispositivo in CURRENT TIME (adesso)*/
 {
-    if (device.is_device_alwaysOn())    /*se e un dispositivo sempre acceso non puo essere acceo nuovamente*/
+    if (device.is_device_alwaysOn())    /*se e' un dispositivo sempre acceso non può essere acceso nuovamente*/
     {
         throw invalid_argument(device.get_device_name() + " e un dispositivo sempre acceso, non puo avere pianificazioni di alcun tipo");
     }
@@ -150,9 +150,9 @@ void DataStructure::set(Device &device, bool on)  /*accendo o spegno un disposit
     if (on) /*caso in cui lo debba accendere*/
     {
 
-        if (device.is_device_on())  /*se e gia acceso non posso accenderlo*/
+        if (device.is_device_on())  /*se è già acceso non posso accenderlo*/
         {
-            throw invalid_argument("oggetto gia acceso");
+            cout<<"--Dispositivo gia' acceso--"<<endl;
         }
         
         else    /*lo posso accendere*/
@@ -164,9 +164,6 @@ void DataStructure::set(Device &device, bool on)  /*accendo o spegno un disposit
               non hannp bisogno di accertamenti aggiuntivi per essere eseguiti*/
             device.modify_device_start(tempo.get_currentTime());
             device.modify_device_status(true);
-            
-            /*funzione di output*/
-//--------- logger.log_updateStatus(tempo, logger, device.get_device_name(), true);
             
             /*controllo la tipologia di dispositivo su cui applico la programmazione*/
             if (device.is_device_automatic())       /*e' automatico*/
@@ -247,7 +244,7 @@ void DataStructure::set(Device &device, bool on)  /*accendo o spegno un disposit
     {
         if (!device.is_device_on())
         {
-            throw invalid_argument("oggetto gia spento");  /*se e gia spento non posso spegnerlo*/
+            cout<<"--Dispositivo gia' spento--"<<endl;  /*se e gia spento non posso spegnerlo*/
         }
         else /*caso in cui debba spegnerlo prima del previsto*/
         {
